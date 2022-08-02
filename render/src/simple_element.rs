@@ -10,7 +10,7 @@ type Attributes<'a> = Option<HashMap<&'a str, Cow<'a, str>>>;
 #[derive(Debug)]
 pub struct SimpleElement<'a, T: Render> {
     /// the HTML tag name, like `html`, `head`, `body`, `link`...
-    pub tag_name: &'a str,
+    pub tag_name: String,
     pub attributes: Attributes<'a>,
     pub contents: Option<T>,
 }

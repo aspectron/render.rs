@@ -121,8 +121,11 @@ pub fn html(input: TokenStream) -> TokenStream {
 #[proc_macro]
 #[proc_macro_error]
 pub fn rsx(input: TokenStream) -> TokenStream {
+    println!("$$$$$$111111");
     let el = parse_macro_input!(input as Element);
+    println!("$$$$$$ 222222222");
     let result = quote! { #el };
+    println!("$$$$$$33333333 :result {}", result.to_string());
     TokenStream::from(result)
 }
 
