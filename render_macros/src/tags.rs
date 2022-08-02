@@ -3,15 +3,8 @@ use proc_macro_error::abort;
 use quote::quote;
 use quote::ToTokens;
 use syn::parse::{Parse, ParseStream, Result};
-//use syn::spanned::Spanned;
 use proc_macro2::TokenTree;
-//use proc_macro2::Punct;
-//use proc_macro2::Spacing;
-//use syn::{Path, PathSegment};
-//use syn::token::Colon2;
-//use proc_macro2::Span;
 use syn::Ident;
-use syn::parse_str;
 
 pub struct OpenTag {
     pub name: TagName,
@@ -42,7 +35,7 @@ impl Parse for TagName {
         input.step(|cursor| {
             let mut rest = *cursor;
             while let Some((tt, next)) = rest.token_tree() {
-                println!("tttttt: {:?}", tt);
+                //println!("TokenTree: {:?}", tt);
                 match &tt {
                     TokenTree::Ident(ident)=> {
                         if valid_ident{
@@ -90,67 +83,10 @@ impl ToTokens for TagName {
     }
 }
 
-fn name_or_fragment(maybe_name: Result<syn::Path>) -> syn::Path {
-    maybe_name.unwrap_or_else(|_| syn::parse_str::<syn::Path>("::render::Fragment").unwrap())
-}
-
-fn is_custom_element_name(tag: &TagName) -> bool {
-    //match path.get_ident() {
-    //    None => true,
-    //    Some(ident) => {
-            let name = tag.to_string();
-            let first_letter = name.get(0..1).unwrap();
-            first_letter.to_uppercase() == first_letter
-    //    }
-    //}
-}
-fn skip_tag_name(input:ParseStream)->Result<()>{
-    input.step(|cursor| {
-        let mut rest = *cursor;
-        while let Some((tt, next)) = rest.token_tree() {
-            match &tt {
-                TokenTree::Punct(punct) if punct.as_char() == ' ' => {
-                    //*tt = proc_macro2::TokenTree::Punct(Punct::new('#', Spacing::from(punct.spacing())));
-                    return Ok(((), next));
-                }
-                TokenTree::Punct(punct) if punct.as_char() == '>' => {
-                    //*tt = proc_macro2::TokenTree::Punct(Punct::new('#', Spacing::from(punct.spacing())));
-                    return Ok(((), rest));
-                }
-                TokenTree::Punct(punct) if punct.as_char() == '/' => {
-                    //*tt = proc_macro2::TokenTree::Punct(Punct::new('#', Spacing::from(punct.spacing())));
-                    return Ok(((), rest));
-                }
-                _ => rest = next,
-            }
-        }
-        Err(cursor.error("no `>` was found"))
-    })?;
-    Ok(())
-}
-
 impl Parse for OpenTag {
     fn parse(input: ParseStream) -> Result<Self> {
-        //println!("input1: {:?}", input);
         input.parse::<syn::Token![<]>()?;
-        //println!("\n\n========input2: {:?}", input);
-        //let s = ParseStream{};
-        //skip_tag_name(input)?;
-        println!("\n\n========input2: {:?}", input);
         let tag_name = input.parse::<TagName>()?;
-        /*
-        let mut seg = Punctuated::<PathSegment, Colon2>::new();
-        let path_seg = parse_str::<PathSegment>("flow")?;
-        //seg.insert(0, PathSegment::from(Ident::new("ssss", Span::call_site())));
-        seg.insert(0, path_seg);
-        seg.insert(1, parse_str::<PathSegment>("select")?);
-        let maybe_name = Ok(Path{
-            leading_colon:None,
-            segments:seg
-        });//syn::Path::parse_mod_style(input);
-        println!("maybe_name: {:?}", maybe_name);
-        let name = name_or_fragment(maybe_name);
-        */
         let is_custom_element = tag_name.is_custom_element_name();
         let attributes = ElementAttributes::parse(input, is_custom_element)?;
         let self_closing = input.parse::<syn::Token![/]>().is_ok();
@@ -188,25 +124,8 @@ impl Parse for ClosingTag {
     fn parse(input: ParseStream) -> Result<Self> {
         input.parse::<syn::Token![<]>()?;
         input.parse::<syn::Token![/]>()?;
-        println!("sssss");
         let tag_name = input.parse::<TagName>()?;
-        //let maybe_name = input.parse::<syn::Path>();
-        /*
-        let mut seg = Punctuated::<PathSegment, Colon2>::new();
-        let path_seg = parse_str::<PathSegment>("flow")?;
-        seg.insert(0, path_seg);
-        seg.insert(1, parse_str::<PathSegment>("select")?);
-        let maybe_name = Ok(Path{
-            leading_colon:None,
-            segments:seg
-        });
-        println!("sssss3333111");
-        skip_tag_name(input)?;
-        */
         input.parse::<syn::Token![>]>()?;
-        println!("sssss3333");
-        //let name = name_or_fragment(maybe_name);
-        println!("sssss333344444: {:?}", tag_name);
         Ok(Self {
             name:tag_name,
         })

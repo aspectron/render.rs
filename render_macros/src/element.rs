@@ -22,15 +22,11 @@ impl Parse for Element {
             closing_tag.validate(&open_tag);
             children
         };
-        println!("ssss4555 : input:{:?}", input);
-        let r = Ok(Element {
+        Ok(Element {
             name: open_tag.name,
             attributes: open_tag.attributes,
             children,
-        });
-
-        println!("ssss6666666666: input:{:?}", input);
-        r
+        })
     }
 }
 
@@ -50,16 +46,12 @@ impl Element {
 impl ToTokens for Element {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
         let name = &self.name;
-        println!("s######### 111111");
         let declaration = if self.is_custom_element() {
-            println!("s######### 222222");
             let attrs = self.attributes.for_custom_element(&self.children);
             quote! { #name #attrs }
         } else {
-            println!("s######### 333333");
             let attrs = self.attributes.for_simple_element();
             let children_tuple = self.children.as_option_of_tuples_tokens();
-            println!("s######### 444444");
             quote! {
                 ::render::SimpleElement {
                     tag_name: String::from(#name),
@@ -68,7 +60,6 @@ impl ToTokens for Element {
                 }
             }
         };
-        println!("s######### 55555555");
         declaration.to_tokens(tokens);
     }
 }
